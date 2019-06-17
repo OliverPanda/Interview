@@ -32,7 +32,7 @@ function unique (target) {
 var arr = [1, 2, [3, 4, [5, 6]]]
 arr.flat() // [1, 2, 3, 4, [5, 6]], 默认深度1
 ```
-[flat-demo截图](./flat-demo.png)
+![flat-demo截图](./img/flat-demo.png)
 
 2. 使用concat
 ```
@@ -44,45 +44,12 @@ arr.flat() // [1, 2, 3, 4, [5, 6]], 默认深度1
   Array.prototype.concat.apply([], b) // [1, 2, 3, 3, 4, 5]
   Array.prototype.concat.call([], b) // [Array(3), Array(2), Array(1)] - [[1,2,3], [3,4], [5]]
 ```
-[flat-concat截图](./flatByConcat.png)
+![flat-concat截图](./img/flatByConcat.png)
 
-
-### call和apply的区别？
-call(): 除了作用域外，可以接受多个参数，依次传入
-apply(): apply(作用域, 参数数组), 除了作用域外，只接受一个数组参数合集
-```
-  var a = [1,2,3,[4,5]]
-  [].concat.apply([], a) // [1, 2, 3, 4, 5]
-
-  [].concat.call([], a) // [1,2,3,[4,5]]
-
-  [].concat.call([], a[0], a[1], a[2], a[3]) // [1,2,3,4,5]
-```
-
-
-### forEach中无法使用await也无法break？
-原因： 因为forEach中代码片段大概为: while( i < arr.length) { callback() }, forEach把处理的函数当作一个回调进行调用, 所以回调中的await和break不能影响到forEach
-<br />
-无法await解决方法： 换成for( itme of arr ) {}  
-无法break的解决方法: trycatch + throw error 
-```
-// fix break demo:
-try {
-  arr.forEach((item, index) => {
-      if (item !== 5) {
-        // break conditions: when to excute break
-        throw new Error('退出forEach循环')
-      }
-  })
-} catch (error) {
-  // handleError
-  Toast(error.message)
-}
-```
 ---
 
-## ES6
-### Map, weakMap, Set, weakSet
+### 数组reverse
+
+### 数据下标i和下标j的数据互换
 
 
-### Generator, Generator返回值

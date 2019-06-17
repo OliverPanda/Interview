@@ -15,7 +15,20 @@ koa异常捕获：
 ### koa源码解析，引用自路哥
 https://github.com/YOLO0927/koa2-source-code-analysis  
 大概总结： 
-1. 四大块: application, context, request, responce
+1. 四大块: application, context, request, response
+
+- application继承与node的事件模块， node事件模块是个发布/订阅模型，所以koa也是和Node一样的异步事件驱动
+  - application数据结构:  
+    ```
+      application: {
+        proxy: false,
+        middlewara: []
+        env: 'development',
+        context,
+        rquest,
+        response
+      }
+    ```
 
 
 ### 常用koa组件
