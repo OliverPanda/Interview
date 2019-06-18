@@ -1,0 +1,15 @@
+{
+  "name": "koa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "koa-middleware-modal.js",
+  "scripts": {},
+  "devDependencies": {
+    "koa": "^2.7.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.7.0"
+  }
+}

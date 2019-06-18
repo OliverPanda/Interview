@@ -18,18 +18,61 @@ https://github.com/YOLO0927/koa2-source-code-analysis
 1. 四大块: application, context, request, response
 
 - application继承与node的事件模块， node事件模块是个发布/订阅模型，所以koa也是和Node一样的异步事件驱动
-  - application数据结构:  
-    ```
-      application: {
-        proxy: false,
-        middlewara: []
-        env: 'development',
-        context,
-        rquest,
-        response
-      }
-    ```
+
+  - application 数据结构
+  ```
+    application: {
+      middleware: [], // 中间件合集, use的时候push进队列
+      env,
+      context,
+      request,
+      response
+    }
+  ```
+  - koa最基础的启动tcp服务的方法: const app = new Koa() -> app.listen(port) -> listen(this.callback()) -> node原生的http.createServer(callback).listen(port)的简写
+  - listen中用到的this.callback() => fn = compose(this.middleware) => compose是什么? koa-compose插件, 返回promise,成功resolve的话会带一个函数fn(context, dispatch.bind(null, i + 1))
+  - createContext:
+  ```
+  <!-- 
+    对app, ctx, req, res, response, request进行初始化赋值
+    response和request是koa自身定义的对象, req和res是node的request, response对象
+   -->
+  context.app = request.app = response.app = application
+  context.req = request.req = response.req = req
+  context.res = request.res = response.res = res
+  request.ctx = response.ctx = context
+  ```
+
+
+
+### koa-compose
+koa的中间件模型： 洋葱模型  
+洋葱模型： （to be continue）
+1. app.use(middlewareFunction) => 存放进application下的this.middleware队列中  
+2. fn = compose(this.middleware)
+
+
+compose主要实现:
+i为中间件在this.middleware队列中的Index, 递归dispatch(i)
+
+> compose过程详细解剖 
+// 解剖:
+dispatch(0) => 返回fn(context, dispatch(1)) 
+=> 执行了dispatch(1) => 返回fn(context, dispatch(2))  
+=> dispatch(3) => 返回fn(context, dispatch(4))
+=> ... => 最后一个中间件， 返回fn(context, dispatch(this.middleware.length))
+=> i === this.middleware.length, fn = next => 调用next => !next => !fn => return Promise.resolve()
+
+我们留意到, 每次返回的fn(context, dispatch(n))和use中间件的参数async (ctx, next)很像，那么dispatch(n)和next之间会不会有什么关系呢？
+
 
 
 ### 常用koa组件
+koa-bodyparser: req.body解析
+
+koa-router: 路由
+
+koa-etag: http协商缓存
+
+koa-logger: 日志
 

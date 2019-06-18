@@ -53,3 +53,42 @@ arr.flat() // [1, 2, 3, 4, [5, 6]], 默认深度1
 ### 数据下标i和下标j的数据互换
 
 
+### 考察立即执行和匿名函数
+```
+var func = (function (a) { // 这个a为接受IIFE参数返回的形参
+	this.a = a // second to excute, 3
+	return function (a) {
+		a += this.a // func(7)调用的时候执行, a = 7
+		return a
+	}
+})(function (a,b) {
+	return a // first to excute, 3
+}(3,5))
+
+func(7) // 10
+
+分解一下： 
+(IIFE1(IIFE2) {
+  return function (a) {
+  }
+})
+函数主体和参数都进行了立即执行, 所以实际上就是foo(params) {} => 先解析params => 实际就是(IIFE(3){ ... })
+=> IIFE替换回来(function(a){ ... }(3)) => this.a === a === 3 => func(7)调用的时候 => 进入return function (a) a为7 => 7 + 3
+```
+
+### 考查事件循环机制
+事件循环机制：
+```
+setTimeout(function () { console.log(1) }, 0)
+
+new Promise(function (resolve) {
+	console.log(2)
+	for( var i = 0; i < 10000; i++ ) {
+		i == 9999 && resolve()
+	}
+  console.log(3)
+}).then(function () { console.log(4) })
+console.log(5)
+// 2 3 5 4 1
+```
+
