@@ -17,3 +17,23 @@ Vue中进行了自动双向绑定的过程，主要使用了观察者模式<br /
 - 依赖收集和派发更新的过程
     - Vue的mount过程是通过mountComponent函数， mountComponent的过程中会实例化一个Watcher，然后对Dep.target赋值为当前watcher，并且执行addDep进行依赖收集
     - 响应式对象的值改变的时候，触发set属性，调用Dep类中的notify方法，通知所有的watcher进行更新
+
+
+## vuex, property was assigned but it has no setter
+出现场景： 
+使用mapState(['test'])API把this.$store.state映射到this下之后, 对this.test进行复制操作(触发setter), 但是没有set
+
+解决： 
+computed: {
+  // 设置当前站点, getter和setter不要使用箭头函数， 可能会导致this错误
+  test: {
+    <!-- getter -->
+    get: function () {
+      console.log(this)
+      console.log(this.$store)
+      return this.$store.state.station.type
+    },
+    <!-- setter -->
+    set: (val) => this.saveStation(val)
+  }
+}

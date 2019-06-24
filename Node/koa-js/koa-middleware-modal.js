@@ -1,6 +1,5 @@
 const Koa = require("koa")
 const app = new Koa()
-console.log(app, 'test')
 app.use(async (ctx, next) => {
   console.log(1)
   await next() // dispatch.bind(null, i + 1)

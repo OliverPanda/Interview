@@ -77,7 +77,7 @@ func(7) // 10
 ```
 
 ### 考查事件循环机制
-事件循环机制：
+事件循环机制：宏任务script => 微任务promise.then => 其他宏任务settimeout, setInterval
 ```
 setTimeout(function () { console.log(1) }, 0)
 

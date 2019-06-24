@@ -21,3 +21,13 @@
 
 ### DOM事件中 target 和 currentTarget 的区别
 event.target 是指触发事件的元素目标，event.currentTarget 是指当前正在处理事件的元素（你绑定的元素），简单来说就是当嵌套 div 时，点击事件同时注册多个 div，外部 div 会接收到内部 div 通过事件冒泡上来的事件，此时内部触发这次事件的 div 就是 target，而你使用外部 div 接收事件做处理时这个外部 div 就是 currentTarget，**记住触发元素是 target，监听元素是 currentTarget 即可**;
+
+
+### 浏览器渲染流程： 
+1. 处理 HTML 标记并构建 DOM 树。
+2. 处理 CSS 标记并构建 CSSOM 树。
+3. 将 DOM 与 CSSOM 合并成一个渲染树。
+4. 根据渲染树来布局，以计算每个节点的几何信息。
+5. 将各个节点绘制到屏幕上  
+[渲染流程](./浏览器渲染流程.png)
+
