@@ -50,7 +50,64 @@ arr.flat() // [1, 2, 3, 4, [5, 6]], 默认深度1
 
 ### 数组reverse
 
-### 数据下标i和下标j的数据互换
+
+### 柯里化
+```
+function currying (fn, ...args) {
+  if (args.length >= fn.length) {
+    return fn(...args)
+  }
+  return function (fn, ...args2) {
+    return fn.apply(null, args.concat(args2))
+  }
+}
+```
+
+### 防抖和节流
+防抖： 规定一定时间内最多执行一次
+节流: (触发时间 - 上一次触发时间 >= 规定时间) ? 执行回调 ： 不执行回调, 最后统一执行一次
+```
+function debounce (func, delay) {
+  var timer = null
+  var that = this
+  return function () {
+    var args = arguments
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      func.apply(that, args)
+    }, delay)
+  }
+}
+
+function throttle(fun, delay) {
+  let last, deferTimer
+  return function (args) {
+    let that = this
+    let _args = arguments
+    let now = +new Date()
+    if (last && now < last + delay) {
+        clearTimeout(deferTimer)
+        deferTimer = setTimeout(function () {
+          last = now
+          fun.apply(that, _args)
+        }, delay)
+    } else {
+      last = now
+      fun.apply(that,_args)
+    }
+  }
+}
+```
+
+
+### myBind
+```
+functino myBind(fn, obj) {
+  return function () {
+    return fn.apply(obj, arguments)
+  }
+}
+```
 
 
 ### 考察立即执行和匿名函数
@@ -90,6 +147,17 @@ new Promise(function (resolve) {
 }).then(function () { console.log(4) })
 console.log(5)
 // 2 3 5 4 1
+```
+
+## hasOwnProperty + Set
+```
+const obj = { 1: 'a', 2: 'b', 3: 'c' }
+const set = new Set([1, 2, 3, 4, 5])
+
+obj.hasOwnProperty('1') // true
+obj.hasOwnProperty(1) // true
+set.has('1') // false
+set.has(1) // true
 ```
 
 

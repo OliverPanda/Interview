@@ -1,6 +1,70 @@
 ### Map, weakMap, Set, weakSet
-Set: 类似于数据，但是成员的值都是唯一的， 接受一个数组(或有iterable接口的数据结构-Array, Object, Map, Set, String)作为参数  
-常用Set方法: add(value), delete(value), has(value), clear()
+#### Set
+Set: 类似于数据，但是成员的值都是唯一的， 接受一个数组(或有iterable接口的数据结构-Array, Object, Map, Set, String)作为参数    
+
+常用Set方法: add(value), delete(value), has(value), clear()  
+常用Set属性：setInstance.size  
+Set加入值的时候不会进行类型转换, **NaN也是可以加入Set中, 且NaN !== NaN， 所以NaN也只能加入一个**    
+
+**Set中使用的判断两个值是否相等使用的是全等(===)**  
+键名和键值一样
+
+#### WeakSet
+1. 成员不可重复（根据引用地址进行判断）
+2. 成员只能是有遍历器的对象，没有size属性
+3. 成员都是弱引用, 随时会消失？(**什么时候触发消失？**)， 成员不可遍历， 因为是弱引用，所以删除实例的时候不会引发内存泄漏
+
+#### Set vs WeakSet
+1. **WeakSet的成员只能是有遍历器的对象(Array, Object, Set, Map, WeakSet, WeakMap)**, Set可以是任意值或者函数
+2. WeakSet没有clear()方法, 没有size属性, 没法遍历成员, Set可以遍历成员
+```
+// set可以是任意值或者函数
+var set = new Set()
+set.add(5) // Set(1) {5}
+set.add('5') // Set(2) {5, "5"}
+set.add(undefined) // Set(3) {5, "5", undefined}
+set.add(function () {return 'a'}) // Set(4) {5, "5", undefined, ƒ}
+set.add(1 + '23') // // Set(5) {5, "5", undefined, ƒ, '123'}
+set.add( (function () {return 'a'})() ) // Set(6) {5, "5", undefined, ƒ, '123', 'a'}
+
+var ws = new WeakSet()
+ws.add(1) // TypeError: Invalid value used in weak set
+ws.add({a: '1'}) // [[Entries]]: Array(1) - 0: Object(value:)
+ws.add([1,2,3]) // [[Entries]]: Array(2)
+ws.add(new Set([1,2,3])) // [[Entries]]: Array(3)
+
+// WeakSet对于“重复”的定义是根据引用判断的
+var ws2 = new WeakSet()
+ws.add({a: 1}) // [[Entries]]: Array(1)
+ws.add({a: 1}) // [[Entries]]: Array(2)
+var obj = {a: 1}
+ws.add(obj) // [[Entries]]: Array(3)
+ws.add(obj) // [[Entries]]: Array(3), 添加失败, 通过引用地址判断是否是相同对象
+```
+
+#### Map
+1. Map和Object一样是键值对的合集
+2. Map中key的范围不限于字符串，可以用各种类型的值当key（包括object）
+3. 和WeakSet中一样，判断是否相同的key值也是通过引用地址进行判定
+```
+<!-- 表达式形式 -->
+new Map([ ['a', 'b'] ]) // Map(1) {"a" => "b"}, 注意是两个[]
+new Map([ ['aa', 'bb', 'cc', 'dd'] ]) // Map(1) {"a" => "b"}, 只取前两个
+new Map(new Set([[1,2],[2,3],['a', 'b']])) // Map(3) {1 => 2, 2 => 3, "a" => "b"}
+
+// key的值通过引用地址判定是否为同一个
+const m = new Map()
+m.set(['a'], 555) // 临时变量temp1 = ['a'], 会分配新的临时引用地址
+m.get(['a']) // 又一个临时变量temp2 = ['a'], temp2引用地址与上面的temp1引用地址不一样, undefined
+var obj = ['a'] // 给['a']赋值到obj上， 分配引用地址objAddr
+m.set(obj, 555)
+m.get(obj) // 555, 通过obj的引用地址objAddr判断找到对应值
+```
+Map常用方法： set(property, value), get(property)  
+
+#### WeakMap
+只接受非null对象作为参数
+
 
 
 ### Prmise规范
@@ -26,7 +90,7 @@ Iterator默认部署在数据结构的Symbol.iterator属性
 调用Iterator接口的场合
 1. 解构复制, 对数组和Set进行解构会默认调用Symbol.iterator
 
-2. 扩展运算符
+2. 扩展运算符(...)
 
 3. yield* + 可遍历结构
 
@@ -101,8 +165,92 @@ a instanceof g // true
 b instanceof normal // false
 ```
 #### async
-async/await的原理其实就是利用Generator  
+1. **async函数的返回值是 Promise 对象** 
+2. **await fn()后面的函数fn得是Promise对象()**, 否则返回对应的值
 
+##### async/await的原理其实就是利用Generator, 将 Generator 函数和自动执行器，包装在一个函数里
+```
+async func fn(args) {
+
+}
+// 等同于
+function fn(args) {
+  // spawn函数就是自动执行器
+  return spawn(function* () {
+
+  })
+}
+```
+
+
+### Promise
+#### Promise/A+规范
+1. 三个状态: pending(默认), fulfilled, rejected
+2. thenable: then返回一个new Promise, 使得能够继续then
+3. 能够进行错误捕捉并reject
+
+#### Promise特性
+1. 对象状态改变只有两种可能: 1. pending => fulfilled  2. pending => rejected
+2. resolve函数的作用： 将Promise对象从pending => fulfilled, reject作用: 将Promise从pending => rejected
+3. 当处于Pending状态(没手动resolve和reject)的时候，无法知道是什么状态
+4. Promise(func), func里resolve不是promise的话， func会立即执行，Promise.then里的内容是异步的微任务
+5. then方法返回新的Promise实例
+6. 在Promise实例p2中， resolve(p1), 如果p1是Promise实例, p1是pending则p2的回调函数func会等到p1状态改变才执行，如果p1是fulfilled或者rejectes, 则p2的回调函数func会立即执行
+
+#### 实现思路： 
+> Promise使用demo: 
+```
+new Promise((resolve, reject) => {
+
+}).then(fulfilledCb[, rejectedCb]).catch((err) => {
+  
+})
+```
+1. Promise回调中自带resolve,reject,所以在构造的时候就应该加上, 然后因为回调不知道会放到哪里用, 所以还是绑定下作用域
+```
+class MyPromise {
+  constructor (cb) {
+    try {
+      cb(this._resolve.bind(this), this._reject.bind(this))
+    } catch (err) {
+      this._reject(err)
+    }
+  }
+}
+```
+
+2. 用到this._resolve, this._reject, 前面提到resolve, reject作用是改变状态, 根据特性4和特性6, resolve的时候需要考虑一下参数是promise的话可能阻塞promise回调执行的情况， 那么开始编写吧！
+
+```
+class MyPromise {
+  constructor (cb) {
+    this._status = PENDING // 传给进入then的时候的状态
+    this._value = undefined // promise返回给then的值
+    ...
+    cb(this._resolve.bind(this), this._reject.bind(this))
+    ...
+  }
+  _resolve(val) {
+    if (this._status !== PENDING) return
+    if (val instanceof MyPromise) {
+      // 调用val.then(fulfilledCb, rejectedCb)判断val的状态之后才运行当前promise的回调
+    }
+    this.status = FULFILLED
+  }
+  _reject (val) {
+    if (this._status !== PENDING) return
+    this.status = REJECTED
+  }
+}
+```
+3. then
+#### 特性入手分析
+- then用法： `then(fulfilledCb[, rejectedCb])`
+- 因为thenable特性，then返回的是一个promise
+#### 做了什么？
+1. 根据上一个promise返回的状态(this._status)判断使用then参数里的fulfilledCb还是rejectedCb   
+2. 出错 && 没定义rejectedCb的话 => 直接将status置为rejected
+3. 捕获resolve(cal)或者reject(val)时遇到的错误
 
 ### let考察
 ```
@@ -133,4 +281,21 @@ if (1) {
 console.log(a) // 2
 
 结论： if无法产生局部作用域 + let没有变量提升 + let暂时性死区(TDZ)
+```
+
+### 静态方法不能用于实例
+```
+class Chameleon {
+  static colorChange(newColor) {
+    this.newColor = newColor
+    return this.newColor
+  }
+
+  constructor({ newColor = 'green' } = {}) {
+    this.newColor = newColor
+  }
+}
+
+const freddie = new Chameleon({ newColor: 'purple' })
+freddie.colorChange('orange') // TypeError
 ```

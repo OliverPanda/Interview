@@ -35,7 +35,8 @@ express中间件使用：
   const app = express()
   app.use(function (req, res, next) {
     ...
-    next() // simply callback not handle with async code
+    await next() // simply callback not handle with async code
+    ...
   })
 ```
 
