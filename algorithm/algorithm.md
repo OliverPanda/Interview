@@ -27,7 +27,7 @@ function quickSort (arr) {
     return arr
   }
   var pivotIndex = Math.floor(arr.length / 2)
-  var pivot = arr.splice(pivotIndex, 1)[0] // 解决最后剩余[1,1]使无法正确找到出口问题, splice返回数组, 能改变原来的数组var a = [1,1] a.splice(1,1)[0]  console.log(a) // [1]
+  var pivot = arr.splice(pivotIndex, 1)[0] // 解决最后剩余[1,1]使无法正确找到出口问题, splice返回数组, 能改变原来的数组var a = [1,1] =>a.splice(1,1)[0]  console.log(a) // [1]
   var left = []
   var right = []
   arr.forEach(row => {
@@ -35,6 +35,26 @@ function quickSort (arr) {
   })
   return quickSort(left).concat(pivot, quickSort(right))
 }
+
+/*
+  插入排序思路： 
+  1. 获取到a[i]并保存(a[i]的值会变, 所以保存), current = a[i]
+  2. current与下标i之前的元素(a[prevIndex])一一对比，如果current < a[prevIndex]的话current前移
+*/
+function insertion(array) {
+  if (!array || array.length <= 2) return
+  var swap = function (array, left, right) {
+    let temp = array[right]
+    array[right] = array[left]
+    array[left] = temp
+  }
+  for (let i = 1; i < array.length; i++) {
+    for (let j = i - 1; j >= 0 && array[j] > array[j + 1]; j--)
+      swap(array, j, j + 1);
+  }
+  return array;
+}
+
 ```
 
 ### 折半查找(二分法查找)
@@ -43,8 +63,6 @@ function quickSort (arr) {
 
 ### 找出最大值的下标
 
-
-### 插入排序
 
 
 ### 斐波那契

@@ -55,8 +55,8 @@ koa的中间件模型： 洋葱模型
 
 - 洋葱模型源码实现流程：
 1. app.use( **async** middlewareFunction ) => 存放进application下的this.middleware队列中  
-2. fn = compose(this.middleware) => compose主要做了中间件自执行
-3. 所有中间件自执行完毕，返回Promise对象并给next赋值`let fn = middleware[i]; if (i === middleware.length) fn = next`
+2. fn = compose(this.middleware) => **compose主要做了中间件自执行**
+3. 所有中间件自执行完毕，返回Promise对象并把next赋值fn，运行next，`let fn = middleware[i]; if (i === middleware.length) fn = next`
 4. 执行await next()之后的代码
 
 

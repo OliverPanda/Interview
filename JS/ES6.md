@@ -171,7 +171,6 @@ b instanceof normal // false
 ##### async/await的原理其实就是利用Generator, 将 Generator 函数和自动执行器，包装在一个函数里
 ```
 async func fn(args) {
-
 }
 // 等同于
 function fn(args) {
@@ -203,7 +202,7 @@ function fn(args) {
 new Promise((resolve, reject) => {
 
 }).then(fulfilledCb[, rejectedCb]).catch((err) => {
-  
+
 })
 ```
 1. Promise回调中自带resolve,reject,所以在构造的时候就应该加上, 然后因为回调不知道会放到哪里用, 所以还是绑定下作用域
@@ -225,7 +224,7 @@ class MyPromise {
 class MyPromise {
   constructor (cb) {
     this._status = PENDING // 传给进入then的时候的状态
-    this._value = undefined // promise返回给then的值
+    this._value = undefined // promise返回给then的值, val或err
     ...
     cb(this._resolve.bind(this), this._reject.bind(this))
     ...
@@ -248,9 +247,19 @@ class MyPromise {
 - then用法： `then(fulfilledCb[, rejectedCb])`
 - 因为thenable特性，then返回的是一个promise
 #### 做了什么？
-1. 根据上一个promise返回的状态(this._status)判断使用then参数里的fulfilledCb还是rejectedCb   
+1. 存储根据上一个promise返回的状态(this._status)判断执行then参数里的fulfilledCb还是rejectedCb
 2. 出错 && 没定义rejectedCb的话 => 直接将status置为rejected
 3. 捕获resolve(cal)或者reject(val)时遇到的错误
+```
+  class myPromise {
+    ...
+    then (fulfilledCb, rejectedCb) {
+      return new myPromise((resolve, reject) => {
+        // 判断this._status + 错误捕获
+      })
+    }
+  }
+```
 
 ### let考察
 ```

@@ -100,7 +100,7 @@ function throttle(fun, delay) {
 ```
 
 
-### myBind
+### myBind: fn.apply(obj, arguments)
 ```
 functino myBind(fn, obj) {
   return function () {
@@ -134,7 +134,10 @@ func(7) // 10
 ```
 
 ### 考查事件循环机制
-事件循环机制：宏任务script => 微任务promise.then => 其他宏任务settimeout, setInterval
+事件循环的顺序，决定了JavaScript代码的执行顺序。它从script(整体代码)开始第一次循环。之后全局上下文进入函数调用栈。直到调用栈清空(只剩全局)，然后执行所有的micro-task。当所有可执行的micro-task执行完毕之后，本轮循环结束。  
+**下一轮循环再次从macro-task开始，找到其中一个任务队列执行完毕，然后再执行所有的micro-task， 接着开始UI render，接着下一轮循环，这样一直循环下去。**
+
+
 ```
 setTimeout(function () { console.log(1) }, 0)
 
@@ -158,6 +161,64 @@ obj.hasOwnProperty('1') // true
 obj.hasOwnProperty(1) // true
 set.has('1') // false
 set.has(1) // true
+```
+
+
+### 实现多重继承
+多重继承： 一个类A可以同时继承多个类B,C，实现思路: 利用for in遍历父类(B, C)的所有属性然后混入到子类中A  
+继承目的： 继承父类中暴露的方法和属性
+```
+var ClassRoom = function (id) {
+  this.id = id
+}
+// 公共方法 暴露id
+ClassRoom.prototype.exposeClassRoomId = function () {
+  return this.id
+}
+
+var Student = function (studentId) {
+  this.studentId = studentId
+}
+Student.prototype.exposeStudentId = function () {
+  return this.studentId
+}
+
+var Person = function (name) {
+  this.name = name
+}
+
+var mixin = function (sourceObj, targetObj) {
+  for (var key in sourceObj) {
+    if (!targetObj[key]) {
+      targetObj[key] = sourceObj[key]
+    }
+  }
+}
+
+var person = new Person('Oliver')
+mixin(new Student(1), person)
+mixin(new ClassRoom(10), person)
+console.log(person, person.id, person.studentId)
+```
+
+### 原型继承
+- 创建临时构造函数
+- 将parent作为临时构造函数的原型
+- 返回new F()给child， child继承parent
+```
+function F () {}
+F.prototype = parent
+child = new F()
+```
+
+### new的时候做了什么?
+```
+// 1. 首先创建一个空对象
+var o = new Object();
+// 2. 将空对象的原型赋值为构造器函数的原型
+o.__proto__ = A.prototype;
+// 3. 更改构造器函数内部this，将其指向新创建的空对象
+A.call(o);
 ```
 
 
